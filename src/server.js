@@ -3,6 +3,7 @@ const express = require('express');
 const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const { body, validationResult } = require('express-validator');
 
 app.use(express.json());
 
@@ -14,12 +15,18 @@ app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
 
-app.post('/posts', (req, res) => {
-  const { title, content, category, tags } = req.body || {};
-
-  if (!title || !content || !category) {
-    return res.status(400).json({ error: 'Missing required fields' });
+app.post('/posts', [
+  body('title').trim().notEmpty().withMessage('Title is required'),
+  body('content').trim().notEmpty().withMessage('Content is required'),
+  body('category').trim().notEmpty().withMessage('Category is required'),
+  body('tags').optional().isArray().withMessage('tags must be an array')
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+
+  const { title, content, category, tags } = req.body || {};
 
   const newPost = {
     id: crypto.randomUUID(),
