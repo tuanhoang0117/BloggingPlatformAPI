@@ -38,14 +38,16 @@ app.post('/posts', (req, res) => {
 
 app.get('/posts', (req, res) => {
 
-  const {term} = req.query;
+  const { term } = req.query;
 
   if (!term){
     return res.status(200).json(posts);
   }
 
+  const lowerTerm = term.toLowerCase();
+
   const results = posts.filter(post =>
-    post.title.includes(term) || post.content.includes(term) || post.category.includes(term)
+    post.title.toLowerCase().includes(lowerTerm) || post.content.toLowerCase().includes(lowerTerm) || post.category.toLowerCase().includes(lowerTerm)
   );
 
   res.status(200).json(results)
