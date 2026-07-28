@@ -15,7 +15,7 @@ app.listen(PORT, () => {
 });
 
 app.post('/posts', (req, res) => {
-  const { title, content, category, tags } = req.body;
+  const { title, content, category, tags } = req.body || {};
 
   if (!title || !content || !category) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -57,7 +57,7 @@ app.put('/posts/:id', (req, res) => {
     return res.status(404).json({ error: 'Post not found' });
   }
 
-  const { title, content, category, tags } = req.body;
+  const { title, content, category, tags } = req.body || {};
 
   if (!title && !content && !category) {
     return res.status(400).json({ error: 'Missing required fields' });
