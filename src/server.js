@@ -37,7 +37,18 @@ app.post('/posts', (req, res) => {
 });
 
 app.get('/posts', (req, res) => {
-  res.status(200).json(posts)
+
+  const {term} = req.query;
+
+  if (!term){
+    return res.status(200).json(posts);
+  }
+
+  const results = posts.filter(post =>
+    post.title.includes(term) || post.content.includes(term) || post.category.includes(term)
+  );
+
+  res.status(200).json(results)
 });
 
 app.get('/posts/:id', (req, res) => {
