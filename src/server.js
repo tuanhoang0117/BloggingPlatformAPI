@@ -70,7 +70,17 @@ app.get('/posts/:id', (req, res) => {
   res.status(200).json(post);
 });
 
-app.put('/posts/:id', (req, res) => {
+app.put('/posts/:id', [
+    body('title').optional().trim().notEmpty().withMessage('Title cannot be empty'),
+    body('content').optional().trim().notEmpty().withMessage('Content cannot be empty'),
+    body('category').optional().trim().notEmpty().withMessage('Category cannot be empty'),
+    body('tags').optional().isArray().withMessage('tags must be an array')
+  ], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const post = posts.find(post => post.id == req.params.id);
 
   if (!post) {
@@ -79,7 +89,7 @@ app.put('/posts/:id', (req, res) => {
 
   const { title, content, category, tags } = req.body || {};
 
-  if (!title && !content && !category) {
+  if (!title && !content && !category && !tags) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
