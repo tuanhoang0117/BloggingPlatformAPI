@@ -113,3 +113,17 @@ app.delete('/posts/:id', (req, res) => {
 
   res.sendStatus(204);
 });
+
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+
+  const statusCode = err.status || 500;
+
+  console.error(err);
+
+  const message = statusCode >= 500
+    ? 'Sorry, something went wrong.'
+    : err.message || 'Sorry, something went wrong.';
+
+  res.status(statusCode).json({ error: message });
+});
