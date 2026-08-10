@@ -23,7 +23,7 @@ app.post('/posts', [
 ], (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({ error: 'Validation failed', details: errors.array() });
   }
 
   const { title, content, category, tags } = req.body || {};
@@ -78,7 +78,7 @@ app.put('/posts/:id', [
   ], (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({ error: 'Validation failed', details: errors.array() });
   }
 
   const post = posts.find(post => post.id == req.params.id);
