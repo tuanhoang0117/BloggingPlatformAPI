@@ -80,13 +80,15 @@ app.put('/posts/:id', [
     body('content').optional().trim().notEmpty().withMessage('Content cannot be empty'),
     body('category').optional().trim().notEmpty().withMessage('Category cannot be empty'),
     body('tags').optional().isArray().withMessage('tags must be an array')
-  ], (req, res) => {
+  ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ error: 'Validation failed', details: errors.array() });
   }
 
-  const post = posts.find(post => post.id == req.params.id);
+  const post = await prisma.post.findUnique({
+    where: { id: req.params.id }
+  });
 
   if (!post) {
     return res.status(404).json({ error: 'Post not found' });
@@ -98,13 +100,12 @@ app.put('/posts/:id', [
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  post.title = title !== undefined ? title : post.title;
-  post.content = content !== undefined ? content : post.content;
-  post.category = category !== undefined ? category : post.category;
-  post.tags = tags !== undefined ? tags : post.tags;
-  post.updatedAt = new Date().toISOString();
+  const updatedPost = await prisma.post.update({
+    where: { id: req.params.id },
+    data: { title, content, category, tags}
+  });
 
-  res.status(200).json(post);
+  res.status(200).json(updatedPost);
 });
 
 app.delete('/posts/:id', (req, res) => {
