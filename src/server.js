@@ -63,8 +63,10 @@ app.get('/posts', async (req, res) => {
   res.status(200).json(results)
 });
 
-app.get('/posts/:id', (req, res) => {
-  const post = posts.find(post => post.id == req.params.id)
+app.get('/posts/:id', async (req, res) => {
+  const post = await prisma.post.findUnique({
+    where: { id: req.params.id }
+  });
 
   if(!post){
     return res.status(404).json({error: 'Post not found'});
