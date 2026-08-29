@@ -1,9 +1,10 @@
-const posts = require('./posts');
-const express = require('express');
-const crypto = require('crypto');
+import express from 'express';
+import { body, validationResult } from 'express-validator';
+import prisma from './prisma.js';
+import posts from './posts.js';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
-const { body, validationResult } = require('express-validator');
 
 app.use(express.json());
 
@@ -20,7 +21,7 @@ app.post('/posts', [
   body('content').trim().notEmpty().withMessage('Content is required'),
   body('category').trim().notEmpty().withMessage('Category is required'),
   body('tags').optional().isArray().withMessage('tags must be an array')
-], (req, res) => {
+], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ error: 'Validation failed', details: errors.array() });
@@ -28,34 +29,36 @@ app.post('/posts', [
 
   const { title, content, category, tags } = req.body || {};
 
-  const newPost = {
-    id: crypto.randomUUID(),
-    title,
-    content,
-    category,
-    tags: tags || [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  posts.push(newPost);
+  const newPost = await prisma.post.create({
+    data: {
+      title,
+      content,
+      category,
+      tags: tags || [],
+    },
+  });
 
   res.status(201).json(newPost);
 });
 
-app.get('/posts', (req, res) => {
+app.get('/posts', async (req, res) => {
 
   const { term } = req.query;
 
   if (!term){
-    return res.status(200).json(posts);
+    const allPosts = await prisma.post.findMany();
+    return res.status(200).json(allPosts);
   }
 
-  const lowerTerm = term.toLowerCase();
-
-  const results = posts.filter(post =>
-    post.title.toLowerCase().includes(lowerTerm) || post.content.toLowerCase().includes(lowerTerm) || post.category.toLowerCase().includes(lowerTerm)
-  );
+  const results = await prisma.post.findMany({
+    where: {
+      OR: [
+        { title: { contains: term, mode: 'insensitive' } },
+        { content: { contains: term, mode: 'insensitive' } },
+        { category: { contains: term, mode: 'insensitive' } }
+      ]
+    }
+  });
 
   res.status(200).json(results)
 });
