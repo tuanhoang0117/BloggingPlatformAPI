@@ -1,7 +1,6 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import prisma from './prisma.js';
-import posts from './posts.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -108,14 +107,14 @@ app.put('/posts/:id', [
   res.status(200).json(updatedPost);
 });
 
-app.delete('/posts/:id', (req, res) => {
-  const postIndex = posts.findIndex(post => post.id == req.params.id);
+app.delete('/posts/:id', async (req, res) => {
+  const post = await prisma.post.findUnique({where: {id: req.params.id}});
 
-  if (postIndex === -1) {
+  if (!post) {
     return res.status(404).json({ error: 'Post not found' });
   }
 
-  posts.splice(postIndex, 1);
+  await prisma.post.delete({ where: { id: req.params.id } });
 
   res.sendStatus(204);
 });
