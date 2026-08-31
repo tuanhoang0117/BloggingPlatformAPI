@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node --test \"src/**/*.test.js\""
+    "test": "DATABASE_URL=\"postgresql://tuanhoang@localhost:5432/blogging_platform_test?schema=public\" node --test \"src/**/*.test.js\""
   },
   "repository": {
     "type": "git",

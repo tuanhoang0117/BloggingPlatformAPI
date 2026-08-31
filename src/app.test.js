@@ -1,7 +1,12 @@
-import { test, describe } from 'node:test';
+import { test, describe, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 import app from './app.js';
+import prisma from './prisma.js';
+
+beforeEach(async () => {
+  await prisma.post.deleteMany();
+});
 
 describe('GET /health', () => {
   test('returns 200 and status ok', async () => {
@@ -37,5 +42,17 @@ describe('POST /posts validation', () => {
       .send({ title: 't', content: 'c', category: 'cat', tags: 'not an array' });
 
     assert.equal(res.status, 400);
+  });
+});
+
+describe('POST /posts', () => {
+  test('creates a post and returns 201 with an id', async () => {
+    const res = await request(app)
+      .post('/posts')
+      .send({ title: 'Test Post', content: 'Test content', category: 'testing' });
+
+    assert.equal(res.status, 201);
+    assert.ok(res.body.id);
+    assert.equal(res.body.title, 'Test Post');
   });
 });
