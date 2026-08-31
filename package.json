@@ -1,12 +1,12 @@
 {
   "name": "blogging-platform-api-",
   "version": "1.0.0",
-  "description": "",
+  "description": "A RESTful API for a personal blogging platform, built with Express and PostgreSQL.",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "DATABASE_URL=\"postgresql://tuanhoang@localhost:5432/blogging_platform_test?schema=public\" node --test \"src/**/*.test.js\""
+    "test": "node --env-file=.env.test --test \"src/**/*.test.js\""
   },
   "repository": {
     "type": "git",
