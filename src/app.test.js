@@ -56,3 +56,22 @@ describe('POST /posts', () => {
     assert.equal(res.body.title, 'Test Post');
   });
 });
+
+describe('PUT /posts/:id', () =>{
+  test('updates a post and the change persists', async () => {
+    const createRes = await request(app)
+      .post('/posts')
+      .send({ title: 'Original Title', content: 'Original content', category: 'testing' });
+
+    const updated = await request(app)
+      .put(`/posts/${createRes.body.id}`)
+      .send({ title: 'Changed' });
+  
+    assert.equal(updated.status, 200);
+    assert.equal(updated.body.title, 'Changed');
+    assert.equal(updated.body.content, 'Original content');
+
+    const fetched = await request(app).get(`/posts/${createRes.body.id}`);
+    assert.equal(fetched.body.title, 'Changed');
+  });
+});
