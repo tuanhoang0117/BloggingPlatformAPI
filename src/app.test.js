@@ -1,4 +1,4 @@
-import { test, describe, beforeEach } from 'node:test';
+import { test, describe, beforeEach, after } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 import app from './app.js';
@@ -7,6 +7,17 @@ import prisma from './prisma.js';
 beforeEach(async () => {
   await prisma.post.deleteMany();
 });
+
+after(async () => {
+  await prisma.$disconnect();
+});
+
+async function createPost(fields = {}) {
+  const res = await request(app)
+    .post('/posts')
+    .send({ title: 'Title', content: 'Content', category: 'general', ...fields });
+  return res.body;
+}
 
 describe('GET /health', () => {
   test('returns 200 and status ok', async () => {
@@ -73,5 +84,75 @@ describe('PUT /posts/:id', () =>{
 
     const fetched = await request(app).get(`/posts/${createRes.body.id}`);
     assert.equal(fetched.body.title, 'Changed');
+  });
+});
+
+describe('GET /posts/:id', () => {
+  test('returns the post when it exists', async () => {
+    const post = await createPost({ title: 'Find me' });
+
+    const res = await request(app).get(`/posts/${post.id}`);
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.id, post.id);
+    assert.equal(res.body.title, 'Find me');
+  });
+
+  test('returns 404 for an unknown id', async () => {
+    const res = await request(app).get('/posts/does-not-exist');
+
+    assert.equal(res.status, 404);
+    assert.deepEqual(res.body, { error: 'Post not found' });
+  });
+});
+
+describe('PUT /posts/:id errors', () => {
+  test('returns 404 for an unknown id', async () => {
+    const res = await request(app)
+      .put('/posts/does-not-exist')
+      .send({ title: 'Changed' });
+
+    assert.equal(res.status, 404);
+  });
+
+  test('rejects an empty update body with 400', async () => {
+    const post = await createPost();
+
+    const res = await request(app).put(`/posts/${post.id}`).send({});
+
+    assert.equal(res.status, 400);
+  });
+});
+
+describe('DELETE /posts/:id', () => {
+  test('deletes the post, returns 204, and the post is gone', async () => {
+    const post = await createPost();
+
+    const res = await request(app).delete(`/posts/${post.id}`);
+    assert.equal(res.status, 204);
+
+    const fetched = await request(app).get(`/posts/${post.id}`);
+    assert.equal(fetched.status, 404);
+  });
+
+  test('returns 404 for an unknown id', async () => {
+    const res = await request(app).delete('/posts/does-not-exist');
+
+    assert.equal(res.status, 404);
+  });
+});
+
+describe('GET /posts?term=', () => {
+  test('matches title, content, or category case-insensitively and excludes non-matches', async () => {
+    await createPost({ title: 'Learning NODE', content: 'x', category: 'a' });
+    await createPost({ title: 'y', content: 'all about node streams', category: 'b' });
+    await createPost({ title: 'z', content: 'z', category: 'Node' });
+    await createPost({ title: 'Cooking', content: 'pasta', category: 'food' });
+
+    const res = await request(app).get('/posts?term=node');
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.length, 3);
+    assert.ok(res.body.every((p) => p.title !== 'Cooking'));
   });
 });
