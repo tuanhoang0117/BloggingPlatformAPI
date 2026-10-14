@@ -1,5 +1,7 @@
 # Blogging Platform API
 
+![Tests](https://github.com/tuanhoang0117/BloggingPlatformAPI/actions/workflows/test.yml/badge.svg)
+
 A REST API for a personal blogging platform. It supports full CRUD on blog posts plus a search filter, backed by PostgreSQL.
 
 This is my implementation of the [Blogging Platform API project](https://roadmap.sh/projects/blogging-platform-api) from [roadmap.sh](https://roadmap.sh).
