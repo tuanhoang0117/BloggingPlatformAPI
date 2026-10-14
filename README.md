@@ -101,7 +101,17 @@ Validation errors include a `details` array with the specific problems:
 }
 ```
 
-## Setup
+## Quick Start (Docker)
+
+```bash
+git clone https://github.com/tuanhoang0117/BloggingPlatformAPI.git
+cd BloggingPlatformAPI
+docker compose up --build
+```
+
+Starts the API on port 3000 and a Postgres 17 container, and applies migrations automatically. No `.env` file or local Postgres needed.
+
+## Local Setup (without Docker)
 
 ### Requirements
 
@@ -111,8 +121,8 @@ Validation errors include a `details` array with the specific problems:
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/tuanhoang0117/Blogging-Platform-API-.git
-cd Blogging-Platform-API-
+git clone https://github.com/tuanhoang0117/BloggingPlatformAPI.git
+cd BloggingPlatformAPI
 npm install
 ```
 
@@ -169,7 +179,7 @@ You should get `{"status":"ok"}`.
 npm test
 ```
 
-This runs against the test database, not your development one, so it won't touch your data. Tests cover the health check, listing posts, creating a post, and validation failures.
+13 integration tests (Node's built-in test runner + Supertest) run against a real Postgres test database, locally and in GitHub Actions on every push. The database is wiped before each test. They cover every route: create, list, keyword search across title/content/category (case-insensitive), get by id, update, delete, validation errors (`400`), and missing posts (`404`).
 
 ### Testing by hand
 
@@ -226,6 +236,5 @@ Features I may add later:
 - JWT authentication so only the author can edit or delete a post
 - Redis caching on `GET /posts`
 - Pagination and rate limiting
-- Docker Compose setup for the app and database
 - Deployment to a hosting service
 - An OpenAPI spec served at `/docs`

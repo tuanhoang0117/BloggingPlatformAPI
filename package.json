@@ -10,16 +10,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tuanhoang0117/Blogging-Platform-API-.git"
+    "url": "git+https://github.com/tuanhoang0117/BloggingPlatformAPI.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "bugs": {
-    "url": "https://github.com/tuanhoang0117/Blogging-Platform-API-/issues"
+    "url": "https://github.com/tuanhoang0117/BloggingPlatformAPI/issues"
   },
-  "homepage": "https://github.com/tuanhoang0117/Blogging-Platform-API-#readme",
+  "homepage": "https://github.com/tuanhoang0117/BloggingPlatformAPI#readme",
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
